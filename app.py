@@ -1,11 +1,20 @@
-from flask import Flask
-from flask import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-from pyscripts import routes
+from flask import Flask , render_template
+
+
+#from pyscripts import routes
+
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Hello, Flask!"
+    return render_template("index.html")
+
+
+@app.route("/Login")
+def Login():
+
+    return "Login Page PH."
+
 
 if __name__ == "__main__":
     app.run(debug=True)
