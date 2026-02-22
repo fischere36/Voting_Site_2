@@ -21,12 +21,9 @@ def load_current_user():
         g.user = db.pull_user_data_id(user_id)
         g.user.password_hash = None
 
-
 @app.route("/")
 def home():
     return render_template("index.html")
-
-
 
 @app.get("/login")
 def login_get():
@@ -75,6 +72,22 @@ def create_account_post():
         return render_template("create_account.html", error="This email is already asociated with an account.")
     else:
         return render_template("create_account.html", error="Unknown error please try again")
+
+@app.get("/vote")
+def create_account_get():
+    
+    return render_template("quote_vs_quote.html",quote1=quote1,quote2=quote2)
+
+@app.post("/create-account")
+
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     db=database()

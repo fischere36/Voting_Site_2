@@ -87,7 +87,7 @@ class database:
                     author = row.get("Author")
                     quote = row.get("Content")
                     timestamp = row.get("Date")
-
+                    
                     # Only write quotes that contain both a space and a double quote
                     if '"' in quote and ' ' in quote:
                         self.writeQuote(timestamp, author, quote)
