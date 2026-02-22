@@ -18,16 +18,17 @@ def login_get():
 def login_post():
     email = request.form["email"]
     password = request.form["password"]
-    #try:
-        
 
+@app.get("/create-account")
+def create_account_get():
+    return render_template("create_account.html")
 
-@app.route("/create-account")
-def create_account():
-
-    return render_template("login.html")
-
-
+@app.post("/create-account")
+def create_account_post():
+    user_name=request.form["user_name"]
+    email = request.form["email"]
+    password = request.form["password"]
+    
 
 if __name__ == "__main__":
     db=database()

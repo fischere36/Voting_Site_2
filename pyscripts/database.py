@@ -97,6 +97,28 @@ class database:
         return True
 
 
+    def new_user(self,user):
+        try:
+            self.cur.execute(
+                'INSERT INTO users (user_name, email, password_hash) VALUES (?, ?, ?)',
+                (user.user_name, user.email, user.password_hash)
+            )
+            return True
+
+        except sql.IntegrityError as e:
+            message = str(e)
+
+            if "user_name" in message:
+                return "username_taken"
+            if "email" in message:
+                return "email_taken"
+
+            return "integrity_error"
+
+        except Exception as e:
+            # Catch any other unexpected errors
+            return "unknown_error"
+
     def writeQuote(self,timestamp,author,quote):
         
         self.cur.execute('INSERT INTO quotes (timestamp, author, quote) VALUES (?, ?, ?)', (timestamp,author,quote))
