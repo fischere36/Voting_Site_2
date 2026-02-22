@@ -1,4 +1,4 @@
-from flask import Flask , render_template
+from flask import Flask , render_template ,request, redirect, session
 from pyscripts.database import database
 
 #from pyscripts import routes
@@ -10,10 +10,23 @@ def home():
     return render_template("index.html")
 
 
-@app.route("/Login")
-def Login():
+@app.get("/login")
+def login_get():
+    return render_template("login.html")
 
-    return "Login Page PH."
+@app.post("/login")
+def login_post():
+    email = request.form["email"]
+    password = request.form["password"]
+    #try:
+        
+
+
+@app.route("/create-account")
+def create_account():
+
+    return render_template("login.html")
+
 
 
 if __name__ == "__main__":

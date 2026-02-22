@@ -2,10 +2,12 @@ import pysqlite3 as sql
 import sys
 import csv
 import json
+from werkzeug.security import generate_password_hash , check_password_hash
+from pyscripts.user import User
+
 
 
 class database:
-
     def __init__(self):
         self.con = sql.connect('prototype.db', check_same_thread=False)
         self.con.isolation_level = None
@@ -19,81 +21,81 @@ class database:
                         author TEXT, 
                         quote TEXT)""")
         
-        self.cur.execute("""CREATE TABLE IF NOT EXISTS ballot(
-                        ballot_id INTEGER PRIMARY KEY AUTOINCREMENT
-                        quote_id_1 INTEGER, 
-                        quote_id_2 INTEGER, 
-                        FOREIGN KEY(quote_id_1) REFERENCES quotes(quotes_id),
-                        FOREIGN KEY(quote_id_2) REFERENCES quotes(quotes_id)  """)
+        #self.cur.execute("""CREATE TABLE IF NOT EXISTS ballot(
+        #                ballot_id INTEGER PRIMARY KEY AUTOINCREMENT
+        #                quote_id_1 INTEGER, 
+        #                quote_id_2 INTEGER, 
+        #                FOREIGN KEY(quote_id_1) REFERENCES quotes(quotes_id),
+        #                FOREIGN KEY(quote_id_2) REFERENCES quotes(quotes_id)  """)
         
         self.cur.execute("""CREATE TABLE IF NOT EXISTS users(
                         user_id INTEGER PRIMARY KEY AUTOINCREMENT,
                         user_name TEXT NOT NULL UNIQUE,
                         email TEXT NOT NULL UNIQUE,
-                        first_name TEXT,
-                        last_name TEXT,
-                        number_of_votes INTEGER)""")
+                        password_hash TEXT NOT NULL)""")
 
         self.cur.execute("""CREATE TABLE IF NOT EXISTS votes(
                         vote_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        quote_id INTERGER NOT NULL,
-                        voter_id INTERGER NOT NULL,
+                        
+                        quote_id_1 INTEGER NOT NULL, 
+                        quote_id_2 INTEGER NOT NULL, 
+                        voted_for INTEGER,
+                        voter_id INTEGER NOT NULL,
+                        
+                        FOREIGN KEY(quote_id_1) REFERENCES quotes(quote_id),
+                        FOREIGN KEY(quote_id_2) REFERENCES quotes(quote_id),
+                        FOREIGN KEY(voted_for) REFERENCES quotes(quote_id),
                         FOREIGN KEY(voter_id) REFERENCES users(user_id),
-                        FOREIGN KEY(quote_id) REFERENCES quotes(quote_id),
-                        number_of_votes INTEGER)""")
+                        
+                        UNIQUE(quote_id_1, quote_id_2, voter_id)
+
+                        )""")
 
     def createUser(self, username, email, fName, lName):
         self.cur.execute('INSERT INTO users (user_name, email, first_name, last_name) VALUES (?, ?, ?, ?)', (username, email, fName, lName))
         
 
-
-    def login(self,username,email):
-        userData=self.pullUserData(username)
-        if userData["email"]==email:
-            return(0)
         
 
-        
+    def pull_user_data_user_name(self,user_name):
+        self.cur.execute("SELECT id, user_name, email, password_hash FROM users WHERE user_name = ?",(user_name,))
+        user_row = self.cur.fetchone()
+        if user_row is None:
+            return(None)
+        user=User.from_db_row(user_row)
+        return(user)
 
-    def pullUserData(self,username):
-        self.cur.execute('''SELECT * FROM users WHERE user_name = ?''',(username,))
-        userDataTuple = self.cur.fetchall()
-        userDataTuple=userDataTuple[0]
-        userData={
-            "user_id":userDataTuple[0],
-            "user_name":userDataTuple[1],
-            "email":userDataTuple[2],
-            "first_name":userDataTuple[3],
-            "last_name":userDataTuple[4]
-        } 
-        return(userData)
+    def pull_user_data_email(self,email):
+        self.cur.execute("SELECT id, user_name, email, password_hash FROM users WHERE email = ?",(email,))
+        user_row = self.cur.fetchone()
+        if user_row is None:
+            return(None)
+        user=User.from_db_row(user_row)
+        return(user)
 
 
-    def readCSV(self,quoteFile):
-        #quoteFile="./quotesfiles/"+"The Better SMP - Main - quotes [837444835472441414].csv"
+    def readCSV(self, quoteFile):
         print("run readCSV")
+
         try:
-            opened = open(quoteFile, mode='r', encoding = 'utf-8-sig')
+            with open(quoteFile, mode='r', encoding='utf-8-sig') as opened:
+                qreader = csv.DictReader(opened)
+
+                for row in qreader:
+                    author = row.get("Author")
+                    quote = row.get("Content")
+                    timestamp = row.get("Date")
+
+                    # Only write quotes that contain both a space and a double quote
+                    if '"' in quote and ' ' in quote:
+                        self.writeQuote(timestamp, author, quote)
+
         except IOError as err:
-            print(f"Unable to open the files '{quoteFile}': {err}", file=sys.stderr)
-            sys.exit(1)
-        
-        qreader=csv.DictReader(opened)
-        for row in qreader:
-            #print("run readCSV quote read")
-            author=row["Author"]
-            quote=row["Content"]
-            timestamp=row["Date"]
-            #self.writeQuote(timestamp,author,quote)
-            try :
-                
-                quote.index('''"''')
-                quote.index(''' ''')
-                #print("run readCSV quote screend")
-                self.writeQuote(timestamp,author,quote)
-                #print("run readCSV quote writen")
-            except:
-                pass
+            print(f"Unable to open the file '{quoteFile}': {err}", file=sys.stderr)
+            return False
+
+        return True
+
 
     def writeQuote(self,timestamp,author,quote):
         
