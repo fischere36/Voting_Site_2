@@ -8,8 +8,8 @@ class User:
         self.password_hash=password_hash
     
     @classmethod
-    def create(user_class, id, user_name, email, raw_password):
-        password_hash = generate_password_hash(raw_password)
+    def create(user_class, id, user_name, email, password):
+        password_hash = generate_password_hash(password)
         return user_class(id, user_name, email, password_hash)
 
     @classmethod
@@ -22,5 +22,5 @@ class User:
         )
 
 
-    def verify_password(self, raw_password):
-        return check_password_hash(self.password_hash, raw_password)
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)

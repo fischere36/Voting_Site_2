@@ -1,0 +1,35 @@
+
+
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quote Voter</title>
+</head>
+<body>
+
+    <!-- Shared header -->
+    <header>
+        <h1>Quote Voter</h1>
+        <nav>
+            <a href="/">Home</a>
+            {% if session.get("user_id") %}
+                <a href="/logout">Logout</a>
+                {% if g.user %}
+                    <h4>{{ g.user.user_name }}</h4>
+                {% endif %}
+
+            {% else %}
+                <a href="/login">Login</a>
+                <a href="/create-account">Create Account</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <!-- Page-specific content goes here -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+</body>
+</html>

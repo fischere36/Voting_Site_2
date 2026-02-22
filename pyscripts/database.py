@@ -51,14 +51,9 @@ class database:
 
                         )""")
 
-    def createUser(self, username, email, fName, lName):
-        self.cur.execute('INSERT INTO users (user_name, email, first_name, last_name) VALUES (?, ?, ?, ?)', (username, email, fName, lName))
-        
-
-        
 
     def pull_user_data_user_name(self,user_name):
-        self.cur.execute("SELECT id, user_name, email, password_hash FROM users WHERE user_name = ?",(user_name,))
+        self.cur.execute("SELECT user_id, user_name, email, password_hash FROM users WHERE user_name = ?",(user_name,))
         user_row = self.cur.fetchone()
         if user_row is None:
             return(None)
@@ -66,13 +61,20 @@ class database:
         return(user)
 
     def pull_user_data_email(self,email):
-        self.cur.execute("SELECT id, user_name, email, password_hash FROM users WHERE email = ?",(email,))
+        self.cur.execute("SELECT user_id, user_name, email, password_hash FROM users WHERE email = ?",(email,))
         user_row = self.cur.fetchone()
         if user_row is None:
             return(None)
         user=User.from_db_row(user_row)
         return(user)
-
+    
+    def pull_user_data_id(self,id):
+        self.cur.execute("SELECT user_id, user_name, email, password_hash FROM users WHERE user_id = ?",(id,))
+        user_row = self.cur.fetchone()
+        if user_row is None:
+            return(None)
+        user=User.from_db_row(user_row)
+        return(user)
 
     def readCSV(self, quoteFile):
         print("run readCSV")
@@ -97,7 +99,8 @@ class database:
         return True
 
 
-    def new_user(self,user):
+    def new_user(self,user:User):
+        print(user.user_name)
         try:
             self.cur.execute(
                 'INSERT INTO users (user_name, email, password_hash) VALUES (?, ?, ?)',
