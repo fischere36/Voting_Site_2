@@ -74,12 +74,13 @@ def create_account_post():
         return render_template("create_account.html", error="Unknown error please try again")
 
 @app.get("/vote")
-def create_account_get():
-    
+def vote_get():
+    db.
     return render_template("quote_vs_quote.html",quote1=quote1,quote2=quote2)
 
-@app.post("/create-account")
-
+@app.post("/vote")
+def vote_post():
+    pass
 
 
 

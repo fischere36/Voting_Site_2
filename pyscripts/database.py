@@ -127,6 +127,9 @@ class database:
         self.cur.execute('INSERT INTO quotes (timestamp, author, quote) VALUES (?, ?, ?)', (timestamp,author,quote))
         #self.con.commit()
 
+    def pull_rand_quote_from_db(self):
+        return
+
     def decodeTimeStamp(self,timestamp):
         timestamp
         tempList=timestamp.split("T")
